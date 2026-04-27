@@ -3,11 +3,14 @@ import {
   Box,
   CircularProgress,
   Fab,
+  InputAdornment,
   Snackbar,
   Stack,
+  TextField,
   Typography,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import SearchIcon from '@mui/icons-material/Search';
 import type { Lottery } from './types';
 import AddLottery from './components/AddLottery.tsx';
 import LotteryCard from './components/LotteryCard.tsx';
@@ -26,6 +29,11 @@ function App() {
     message: '',
   });
   const [refreshKey, setRefreshKey] = useState(0);
+  const [filter, setFilter] = useState('');
+
+  const filteredLotteries = lotteries.filter((l) =>
+    l.name.toLowerCase().includes(filter.toLowerCase()),
+  );
 
   useEffect(() => {
     const fetchLotteries = async () => {
@@ -74,6 +82,23 @@ function App() {
         Lotteries 🎲
       </Typography>
 
+      <TextField
+        value={filter}
+        onChange={(e) => setFilter(e.target.value)}
+        placeholder="Search"
+        size="small"
+        sx={{ width: 300, mb: 3, alignSelf: 'center' }}
+        slotProps={{
+          input: {
+            endAdornment: (
+              <InputAdornment position="end">
+                <SearchIcon fontSize="small" />
+              </InputAdornment>
+            ),
+          },
+        }}
+      />
+
       {isLoading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', pt: 4 }}>
           <CircularProgress />
@@ -88,14 +113,23 @@ function App() {
             pb: 10,
           }}
         >
-          {lotteries.map((lottery) => (
-            <LotteryCard
-              key={lottery.id}
-              lottery={lottery}
-              selected={selectedIds.has(lottery.id)}
-              onToggle={toggleLottery}
-            />
-          ))}
+          {filteredLotteries.length === 0 ? (
+            <Typography
+              variant="body1"
+              sx={{ gridColumn: '1 / -1', textAlign: 'center', pt: 2 }}
+            >
+              No search results for &apos;{filter}&apos;
+            </Typography>
+          ) : (
+            filteredLotteries.map((lottery) => (
+              <LotteryCard
+                key={lottery.id}
+                lottery={lottery}
+                selected={selectedIds.has(lottery.id)}
+                onToggle={toggleLottery}
+              />
+            ))
+          )}
         </Box>
       )}
 
