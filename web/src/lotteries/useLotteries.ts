@@ -8,8 +8,10 @@ const API_URL = `${import.meta.env.VITE_API_URL}/lotteries`;
 
 export const useLotteries = () => {
   const { lotteriesToRegister, handleSelectLotteryToRegister, clearLotteriesToRegister, setLotteriesToRegister } = useLotteriesToRegister();
+  const [searchFilter, setSearchFilter] = useState('');
   
-  const { data: lotteries, isLoading, error } = useSWR<Lottery[]>(API_URL, (url: string) => fetch(url).then(res => res.json()));
+  const apiUrl = searchFilter ? `${API_URL}?filter=${encodeURIComponent(searchFilter)}` : API_URL;
+  const { data: lotteries, isLoading, error } = useSWR<Lottery[]>(apiUrl, (url: string) => fetch(url).then(res => res.json()));
   const [isAdding, setAdding] = useState(false);
   const [errorAdding, setErrorAdding] = useState<Error>();
   const { mutate } = useSWRConfig();
@@ -54,11 +56,15 @@ export const useLotteries = () => {
     isAdding,
     isLoading,
     error,
+    searchFilter,
+    setSearchFilter,
   }), [
     lotteries, isLoading, error,
     // add
     addLottery, isAdding, errorAdding, resetErrorAdding, 
     // register
-    lotteriesToRegister, handleSelectLotteryToRegister, clearLotteriesToRegister, setLotteriesToRegister
+    lotteriesToRegister, handleSelectLotteryToRegister, clearLotteriesToRegister, setLotteriesToRegister,
+    // search
+    searchFilter, setSearchFilter
   ]);
 }

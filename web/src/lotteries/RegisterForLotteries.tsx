@@ -30,7 +30,6 @@ export const RegisterForLotteries = () => {
         'register-modal-name': Yup.string().min(3, 'Name must be at least 3 characters').required('Required'),
       }),
     onSubmit: async (e) => {
-      console.log({e})
       try {
         await registerForLotteries([...lotteriesToRegister.values()], e["register-modal-name"])
       } catch (err) {

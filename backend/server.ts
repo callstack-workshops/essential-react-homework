@@ -58,26 +58,29 @@ if (process.env.NODE_ENV === 'development') {
 
 // API routes
 
-app.get(
-  '/lotteries',
-  async (
-    req: Request,
-    res: Response<APIResponse<Lottery[]>>,
-  ): Promise<void> => {
-    try {
-      const lotteryIds = await client.lRange('lotteries', 0, -1);
+app.get('/lotteries', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const filter = ((req.query.filter as string) || '').toLowerCase();
+    const lotteryIds = await client.lRange('lotteries', 0, -1);
 
-      const transaction = client.multi();
-      lotteryIds.forEach((id: string) => transaction.hGetAll(`lottery.${id}`));
-      const lotteries = await transaction.exec();
+    const transaction = client.multi();
+    lotteryIds.forEach((id: string) => transaction.hGetAll(`lottery.${id}`));
+    const lotteries = (await transaction.exec()) as Lottery[];
 
-      res.json(lotteries);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Failed to read the lotteries data' });
-    }
-  },
-);
+    const filteredLotteries = filter
+      ? lotteries.filter(
+          (lottery) =>
+            lottery.name.toLowerCase().includes(filter) ||
+            lottery.prize.toLowerCase().includes(filter),
+        )
+      : lotteries;
+
+    res.json(filteredLotteries);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to read the lotteries data' });
+  }
+});
 
 app.post(
   '/lotteries',

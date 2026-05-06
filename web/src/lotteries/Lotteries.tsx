@@ -1,14 +1,17 @@
-import { Box, Grid, Paper, Typography } from "@mui/material"
+import { Box, Grid, InputAdornment, Paper, TextField, Typography } from "@mui/material"
 import SentimentDissatisfiedIcon from '@mui/icons-material/SentimentDissatisfied';
+import SearchIcon from '@mui/icons-material/Search';
+import SearchOffIcon from '@mui/icons-material/SearchOff';
 import CircularProgress from '@mui/material/CircularProgress';
 import styled from "@emotion/styled";
 import { AddLotteries } from "./AddLotteries";
 import { useLotteries } from "./useLotteries";
 import { RegisterForLotteries } from "./RegisterForLotteries";
 import type { Lottery } from "./types";
-import { useCallback } from "react";
 
-const Item = styled(Paper)<{ finished?: boolean }>(({ finished }) => ({
+const Item = styled(Paper, {
+  shouldForwardProp: (prop) => prop !== 'finished',
+})<{ finished?: boolean }>(({ finished }) => ({
   backgroundColor: finished ? '#f5f5f5' : '#fff',
   padding: '8px',
   cursor: finished ? 'default' : 'pointer',
@@ -27,18 +30,48 @@ const Checkbox = styled('input')({
 });
 
 export const Lotteries = () => {
-  const { isLoading, lotteries, lotteriesToRegister, handleSelectLotteryToRegister } = useLotteries();
+  const { isLoading, lotteries, lotteriesToRegister, handleSelectLotteryToRegister, searchFilter, setSearchFilter } = useLotteries();
 
-  const isFinished = useCallback((l: Lottery) => l.status === 'finished', []);
+  
+  const hasSearchFilter = searchFilter.trim().length > 0;
+  const noSearchResults = !isLoading && hasSearchFilter && !lotteries.length;
+  const noLotteries = !isLoading && !hasSearchFilter && !lotteries.length;
+
+  const isFinished = (l: Lottery) => l.status === 'finished';
 
   return (
     <>
       <Box sx={{maxWidth: '800px', m: 'auto', mt: 5 }}>
-        {!isLoading && !lotteries.length && (
+        <TextField
+          fullWidth
+          placeholder="Search lotteries..."
+          value={searchFilter}
+          onChange={(e) => setSearchFilter(e.target.value)}
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+            },
+          }}
+          sx={{ mb: 3 }}
+        />
+
+        {noLotteries && (
           <Typography variant="body1" sx={{textAlign:'center', mt: 4}}>
             <SentimentDissatisfiedIcon />
             <br />
             There are no lotteries currently
+          </Typography>
+        )}
+
+        {noSearchResults && (
+          <Typography variant="body1" sx={{textAlign:'center', mt: 4}}>
+            <SearchOffIcon />
+            <br />
+            No lotteries found for "{searchFilter}"
           </Typography>
         )}
 
@@ -66,7 +99,7 @@ export const Lotteries = () => {
                     tabIndex={isFinished(l) ? -1 : 0}
                     onClick={() => !isFinished(l) && handleSelectLotteryToRegister(l.id)}
                     onKeyDown={(e) => {
-                      if (l.status !== 'finished' && (e.key === ' ' || e.key === 'Enter')) {
+                      if (!isFinished(l) && (e.key === ' ' || e.key === 'Enter')) {
                         e.preventDefault();
                         handleSelectLotteryToRegister(l.id);
                       }
