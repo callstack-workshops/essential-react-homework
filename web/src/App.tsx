@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Fab, Snackbar, Alert } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import AddLotteryModal from './AddLotteryModal';
+import LotteryList from './LotteryList';
 
 function App() {
   // State to control modal open/close
@@ -17,6 +18,9 @@ function App() {
     message: '',
     severity: 'success',
   });
+
+  // State to trigger lottery list refresh
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
@@ -36,6 +40,8 @@ function App() {
       message,
       severity: 'success',
     });
+    // Trigger lottery list refresh
+    setRefreshTrigger((prev) => prev + 1);
   };
 
   const handleError = (message: string) => {
@@ -48,6 +54,9 @@ function App() {
 
   return (
     <>
+      {/* Lottery List */}
+      <LotteryList refreshTrigger={refreshTrigger} />
+
       {/* Floating Action Button */}
       <Fab
         variant="extended"
