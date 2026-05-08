@@ -29,8 +29,16 @@ function App() {
   // State to track loading
   const [isLoading, setIsLoading] = useState(false);
 
-  // State for success notification
-  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  // State for notifications (toast)
+  const [toast, setToast] = useState<{
+    open: boolean;
+    message: string;
+    severity: 'success' | 'error';
+  }>({
+    open: false,
+    message: '',
+    severity: 'success',
+  });
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
@@ -45,8 +53,8 @@ function App() {
     setIsModalOpen(false);
   };
 
-  const handleCloseSnackbar = () => {
-    setShowSuccessMessage(false);
+  const handleCloseToast = () => {
+    setToast({ ...toast, open: false });
   };
 
   const handleAdd = async () => {
@@ -77,15 +85,47 @@ function App() {
     if (isValid) {
       setIsLoading(true);
 
-      // Simulate API call with 2 second delay
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      try {
+        // Make API call to save lottery
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/lotteries`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              type: 'simple',
+              name: lotteryName,
+              prize: lotteryPrize,
+            }),
+          },
+        );
 
-      console.log('Lottery Name:', lotteryName);
-      console.log('Lottery Prize:', lotteryPrize);
+        if (!response.ok) {
+          throw new Error('Failed to create lottery');
+        }
 
-      setIsLoading(false);
-      handleCloseModal();
-      setShowSuccessMessage(true);
+        const data = await response.json();
+        console.log('Lottery created:', data);
+
+        setIsLoading(false);
+        handleCloseModal();
+        setToast({
+          open: true,
+          message: 'Lottery added successfully!',
+          severity: 'success',
+        });
+      } catch (error) {
+        console.error('Error creating lottery:', error);
+        setIsLoading(false);
+        setToast({
+          open: true,
+          message:
+            error instanceof Error ? error.message : 'Failed to create lottery',
+          severity: 'error',
+        });
+      }
     }
   };
 
@@ -154,20 +194,20 @@ function App() {
         </DialogActions>
       </Dialog>
 
-      {/* Success Notification */}
+      {/* Notification Toast */}
       <Snackbar
-        open={showSuccessMessage}
-        autoHideDuration={4000}
-        onClose={handleCloseSnackbar}
+        open={toast.open}
+        autoHideDuration={toast.severity === 'error' ? 6000 : 4000}
+        onClose={handleCloseToast}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
         <Alert
-          onClose={handleCloseSnackbar}
-          severity="success"
+          onClose={handleCloseToast}
+          severity={toast.severity}
           variant="filled"
           sx={{ width: '100%' }}
         >
-          Lottery added successfully!
+          {toast.message}
         </Alert>
       </Snackbar>
     </>
