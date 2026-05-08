@@ -5,9 +5,11 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  CircularProgress,
+  Box,
   TextField,
-  Button,
 } from '@mui/material';
+import { LoadingButton } from '@mui/lab';
 import AddIcon from '@mui/icons-material/Add';
 
 function App() {
@@ -22,6 +24,9 @@ function App() {
   const [nameError, setNameError] = useState('');
   const [prizeError, setPrizeError] = useState('');
 
+  // State to track loading
+  const [isLoading, setIsLoading] = useState(false);
+
   const handleOpenModal = () => {
     setIsModalOpen(true);
     // Clear form and errors when opening
@@ -35,7 +40,7 @@ function App() {
     setIsModalOpen(false);
   };
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
     // Reset errors
     setNameError('');
     setPrizeError('');
@@ -61,8 +66,15 @@ function App() {
 
     // Only proceed if validation passes
     if (isValid) {
+      setIsLoading(true);
+
+      // Simulate API call with 2 second delay
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       console.log('Lottery Name:', lotteryName);
       console.log('Lottery Prize:', lotteryPrize);
+
+      setIsLoading(false);
       handleCloseModal();
     }
   };
@@ -115,9 +127,20 @@ function App() {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleAdd} variant="contained">
+          <LoadingButton
+            onClick={handleAdd}
+            loading={isLoading}
+            loadingIndicator={
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <CircularProgress size={16} color="inherit" />
+                Adding...
+              </Box>
+            }
+            variant="contained"
+            sx={{ minWidth: 120 }}
+          >
             Add
-          </Button>
+          </LoadingButton>
         </DialogActions>
       </Dialog>
     </>
