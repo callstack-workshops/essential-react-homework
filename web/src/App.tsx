@@ -1,122 +1,127 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState } from 'react';
+import {
+  Fab,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Button,
+} from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 
 function App() {
-  const [count, setCount] = useState(0)
+  // State to control modal open/close
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // State to store form values
+  const [lotteryName, setLotteryName] = useState('');
+  const [lotteryPrize, setLotteryPrize] = useState('');
+
+  // State to store validation errors
+  const [nameError, setNameError] = useState('');
+  const [prizeError, setPrizeError] = useState('');
+
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+    // Clear form and errors when opening
+    setLotteryName('');
+    setLotteryPrize('');
+    setNameError('');
+    setPrizeError('');
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleAdd = () => {
+    // Reset errors
+    setNameError('');
+    setPrizeError('');
+
+    // Validate fields
+    let isValid = true;
+
+    if (!lotteryName.trim()) {
+      setNameError('Lottery name is required');
+      isValid = false;
+    } else if (lotteryName.trim().length < 4) {
+      setNameError('Lottery name must be at least 4 characters long');
+      isValid = false;
+    }
+
+    if (!lotteryPrize.trim()) {
+      setPrizeError('Lottery prize is required');
+      isValid = false;
+    } else if (lotteryPrize.trim().length < 4) {
+      setPrizeError('Lottery prize must be at least 4 characters long');
+      isValid = false;
+    }
+
+    // Only proceed if validation passes
+    if (isValid) {
+      console.log('Lottery Name:', lotteryName);
+      console.log('Lottery Prize:', lotteryPrize);
+      handleCloseModal();
+    }
+  };
 
   return (
     <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+      {/* Floating Action Button */}
+      <Fab
+        variant="extended"
+        color="primary"
+        aria-label="add lottery"
+        onClick={handleOpenModal}
+        sx={{
+          position: 'fixed',
+          bottom: 16,
+          right: 16,
+        }}
+      >
+        <AddIcon sx={{ mr: 1 }} />
+        ADD LOTTERY
+      </Fab>
 
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
+      {/* Modal Dialog */}
+      <Dialog open={isModalOpen} onClose={handleCloseModal}>
+        <DialogTitle>Add a new lottery</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Lottery name"
+            type="text"
+            fullWidth
+            variant="outlined"
+            value={lotteryName}
+            onChange={(e) => setLotteryName(e.target.value)}
+            error={!!nameError}
+            helperText={nameError}
+            sx={{ mb: 2, mt: 1 }}
+          />
+          <TextField
+            margin="dense"
+            label="Lottery prize"
+            type="text"
+            fullWidth
+            variant="outlined"
+            value={lotteryPrize}
+            onChange={(e) => setLotteryPrize(e.target.value)}
+            error={!!prizeError}
+            helperText={prizeError}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleAdd} variant="contained">
+            Add
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
