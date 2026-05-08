@@ -6,7 +6,10 @@ import {
   Card,
   CardContent,
   CircularProgress,
+  TextField,
+  InputAdornment,
 } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
 
 type Status = 'running' | 'finished';
 
@@ -31,6 +34,7 @@ function LotteryList({
 }: LotteryListProps) {
   const [lotteries, setLotteries] = useState<Lottery[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const fetchLotteries = async () => {
@@ -56,6 +60,11 @@ function LotteryList({
     fetchLotteries();
   }, [refreshTrigger]);
 
+  // Filter lotteries based on search query
+  const filteredLotteries = lotteries.filter((lottery) =>
+    lottery.name.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
+
   if (isLoading) {
     return (
       <Container maxWidth="md">
@@ -79,6 +88,24 @@ function LotteryList({
         <Typography variant="h3" component="h1" align="center" gutterBottom>
           Lotteries
         </Typography>
+
+        {/* Search Input */}
+        <TextField
+          fullWidth
+          placeholder="Search lotteries..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+            },
+          }}
+          sx={{ mb: 3 }}
+        />
       </Box>
 
       {lotteries.length === 0 ? (
@@ -94,6 +121,19 @@ function LotteryList({
             There are no lotteries currently
           </Typography>
         </Box>
+      ) : filteredLotteries.length === 0 ? (
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            minHeight: '40vh',
+          }}
+        >
+          <Typography variant="h6" color="text.secondary">
+            No search results found for "{searchQuery}"
+          </Typography>
+        </Box>
       ) : (
         <Box
           sx={{
@@ -106,7 +146,7 @@ function LotteryList({
             gap: 3,
           }}
         >
-          {lotteries.map((lottery) => {
+          {filteredLotteries.map((lottery) => {
             const isSelected = selectedLotteries.includes(lottery.id);
             const isFinished = lottery.status === 'finished';
             const isSelectable = !isFinished;
