@@ -20,9 +20,15 @@ type Lottery = {
 
 interface LotteryListProps {
   refreshTrigger?: number;
+  selectedLotteries: string[];
+  onSelectLottery: (id: string) => void;
 }
 
-function LotteryList({ refreshTrigger }: LotteryListProps) {
+function LotteryList({
+  refreshTrigger,
+  selectedLotteries,
+  onSelectLottery,
+}: LotteryListProps) {
   const [lotteries, setLotteries] = useState<Lottery[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -100,35 +106,55 @@ function LotteryList({ refreshTrigger }: LotteryListProps) {
             gap: 3,
           }}
         >
-          {lotteries.map((lottery) => (
-            <Card
-              key={lottery.id}
-              sx={{
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                opacity: lottery.status === 'finished' ? 0.6 : 1,
-              }}
-            >
-              <CardContent>
-                <Typography variant="h6" component="h2" gutterBottom>
-                  {lottery.name}
-                </Typography>
-                <Typography variant="body1" color="text.secondary">
-                  Prize: {lottery.prize}
-                </Typography>
-                <Typography
-                  variant="caption"
-                  color={
-                    lottery.status === 'running' ? 'success.main' : 'error.main'
-                  }
-                  sx={{ mt: 1, display: 'block', textTransform: 'uppercase' }}
-                >
-                  {lottery.status}
-                </Typography>
-              </CardContent>
-            </Card>
-          ))}
+          {lotteries.map((lottery) => {
+            const isSelected = selectedLotteries.includes(lottery.id);
+            const isFinished = lottery.status === 'finished';
+            const isSelectable = !isFinished;
+
+            return (
+              <Card
+                key={lottery.id}
+                onClick={() => isSelectable && onSelectLottery(lottery.id)}
+                sx={{
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  opacity: isFinished ? 0.6 : 1,
+                  cursor: isSelectable ? 'pointer' : 'default',
+                  border: isSelected ? '2px solid' : '1px solid',
+                  borderColor: isSelected ? 'primary.main' : 'divider',
+                  backgroundColor: isSelected ? 'action.selected' : 'background.paper',
+                  transition: 'all 0.2s',
+                  '&:hover': isSelectable
+                    ? {
+                        boxShadow: 3,
+                        transform: 'translateY(-2px)',
+                      }
+                    : {},
+                }}
+              >
+                <CardContent>
+                  <Typography variant="h6" component="h2" gutterBottom>
+                    {lottery.name}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary">
+                    Prize: {lottery.prize}
+                  </Typography>
+                  <Typography
+                    variant="caption"
+                    color={
+                      lottery.status === 'running'
+                        ? 'success.main'
+                        : 'error.main'
+                    }
+                    sx={{ mt: 1, display: 'block', textTransform: 'uppercase' }}
+                  >
+                    {lottery.status}
+                  </Typography>
+                </CardContent>
+              </Card>
+            );
+          })}
         </Box>
       )}
     </Container>

@@ -7,8 +7,8 @@ import {
   CircularProgress,
   Box,
   TextField,
+  Button,
 } from '@mui/material';
-import { LoadingButton } from '@mui/lab';
 
 interface AddLotteryModalProps {
   open: boolean;
@@ -143,20 +143,21 @@ function AddLotteryModal({
         />
       </DialogContent>
       <DialogActions>
-        <LoadingButton
+        <Button
           onClick={handleAdd}
-          loading={isLoading}
-          loadingIndicator={
+          disabled={isLoading}
+          variant="contained"
+          sx={{ minWidth: 120 }}
+        >
+          {isLoading ? (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <CircularProgress size={16} color="inherit" />
               Adding...
             </Box>
-          }
-          variant="contained"
-          sx={{ minWidth: 120 }}
-        >
-          Add
-        </LoadingButton>
+          ) : (
+            'Add'
+          )}
+        </Button>
       </DialogActions>
     </Dialog>
   );
