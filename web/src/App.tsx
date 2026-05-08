@@ -8,6 +8,8 @@ import {
   CircularProgress,
   Box,
   TextField,
+  Snackbar,
+  Alert,
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import AddIcon from '@mui/icons-material/Add';
@@ -27,6 +29,9 @@ function App() {
   // State to track loading
   const [isLoading, setIsLoading] = useState(false);
 
+  // State for success notification
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+
   const handleOpenModal = () => {
     setIsModalOpen(true);
     // Clear form and errors when opening
@@ -38,6 +43,10 @@ function App() {
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
+  };
+
+  const handleCloseSnackbar = () => {
+    setShowSuccessMessage(false);
   };
 
   const handleAdd = async () => {
@@ -76,6 +85,7 @@ function App() {
 
       setIsLoading(false);
       handleCloseModal();
+      setShowSuccessMessage(true);
     }
   };
 
@@ -143,6 +153,23 @@ function App() {
           </LoadingButton>
         </DialogActions>
       </Dialog>
+
+      {/* Success Notification */}
+      <Snackbar
+        open={showSuccessMessage}
+        autoHideDuration={4000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity="success"
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          Lottery added successfully!
+        </Alert>
+      </Snackbar>
     </>
   );
 }
